@@ -1,0 +1,127 @@
+// ==================================================== //
+// eAthena						//
+// Não remover os créditos				//
+// Feito por: CarlosHenrq (eAthena/Cronus)		//
+// Suportado por: Cronus e eAthena [SQL e TXT]		//
+// Versão do script: Final - Testado e Funcionando	//
+// ==================================================== //
+prontera,147,153,5	script	Trocador de Itens	123,{
+	mes "["+strnpcinfo(0)+"]";
+	if(!getarraysize($troca_item) && getgmlevel() < 99){
+		mes "Em Manutenção, por favor contate um Administrador.";
+		close;
+	}else if(getgmlevel() >= 99){
+		mes "Gostaria de Administrar a troca de itens?";
+		if(!getarraysize($troca_item)) mes "^ff0000Lembrando que se você não configurar, outros jogadores não poderão acessar.^000000";
+		next;
+		if(select("Sim:Não")) == 2 close;
+			mes "["+strnpcinfo(0)+"]";
+			mes "Escolha a opção que você deseja.";
+			next;
+			switch(select("Adicionar Itens:"+((getarraysize($troca_item)) ? "Editar Item":"")+":"+((getarraysize($troca_item)) ? "Remover Todos":"")+":Cancelar")){
+					mes "["+strnpcinfo(0)+"]";
+				case 1:
+					if(getarraysize($troca_item)) mes "Existem "+getarraysize($troca_item)+" configurados.";
+					else mes "Não há itens configurados, por favor, configure-os.";
+					next;
+					do{
+						mes "["+strnpcinfo(0)+"]";
+						mes "Digite o id do item. [Itens Adicionados: "+getarraysize($troca_item)+"/127]";
+						input @id;
+						next;
+						while(getitemname(@id) == "null"){
+							mes "["+strnpcinfo(0)+"]";
+							mes "Item inválido, Digitar Novamente?";
+							next;
+							if(select("Não:Sim")) == 1 close;
+								input @id;
+						}
+						mes "["+strnpcinfo(0)+"]";
+						mes "Digite um valor para o item.";
+						input @vr;
+						next;
+						while(!@vr){
+							mes "["+strnpcinfo(0)+"]";
+							mes "Valor Invalido! Digitar novamente?";
+							next;
+							if(select("Sim:Não")) == 2 close;
+								input @vr;
+						}
+						mes "["+strnpcinfo(0)+"]";
+						mes getitemname(@id)+" Valor: "+@vr;
+						next;
+						if(select("Adicionar:Cancelar")) == 2 close;
+							set $troca_item[getarraysize($troca_item)],@id;
+							set $troca_valr[getarraysize($troca_item)],@vr;
+							dispbottom "Item adicionado";
+						if(select("Sair:Continuar")) == 1 close;
+					}while(getarraysize($troca_item) < 127);
+					mes "["+strnpcinfo(0)+"]";
+					mes "O número de itens está no limite, por favor, edite ou remova.";
+					close;
+				case 2:
+					for(set @i,0; @i < getarraysize($troca_item); set @i,@i+1){
+						mes getitemname($troca_item[@i])+" Valor: "+$troca_valr[@i];
+						set .@menu$,.@menu$+(@i+1)+"º "+getitemname($troca_item[@i])+":";
+					}
+					mes "Qual você deseja editar?";
+					next;
+					set @s,select(.@menu$)-1;
+					mes "["+strnpcinfo(0)+"]";
+					mes "Digite um novo valor para o item.";
+					next;
+					input @vr;
+					while(!@vr){
+						mes "["+strnpcinfo(0)+"]";
+						mes "Este valor não é valido!";
+						next;
+						input @vr;
+					}
+					set $troca_valr[@s],@vr;
+					mes "["+strnpcinfo(0)+"]";
+					mes "Valor alterado.";
+					close;
+				case 3:
+					mes "^ff0000SE VOCÊ FIZER ISSO, NÃO HAVERÁ RETORNO, DESEJA CONTINUAR?^000000";
+					next;
+					if(select("Não:Sim")) == 1 close;
+						cleararray $troca_item[0],0,127;
+						cleararray $troca_valr[0],0,127;
+						mes "["+strnpcinfo(0)+"]";
+						mes "Valores Resetados!";
+						close;
+				default:
+					mes "Tenha um bom dia.";
+					close;
+			}
+	}else if(getgmlevel() >= 10 && getgmlevel() < 99){
+		mes "Membros da staff não podem utilizar este npc.";
+		close;
+	}else{
+		mes "Gostaria de trocar algum item seu por cash?";
+		next;
+		if(select("Sim:Não")) == 2 close;
+			mes "["+strnpcinfo(0)+"]";
+			mes "Selelcione o item que você deseja trocar por cash.";
+			next;
+			for(set @i,0; @i < getarraysize($troca_item); set @i,@i+1)
+				set .@menu$,.@menu$+getitemname($troca_item[@i])+" - "+$troca_valr[@i]+":";
+			set @s,select(.@menu$)-1;
+			mes "["+strnpcinfo(0)+"]";
+			if(!countitem($troca_item[@s])){
+				mes "Você não possui este item por isso não poderá troca-lo!";
+				close;
+			}
+			mes "Você tem certeza que deseja trocar o item "+getitemname($troca_item[@s])+" por "+$troca_valr[@s]+" em cash?";
+			next;
+			if(select("Não:Sim")) == 1 close;
+				delitem $troca_item[@s],1;
+				set #CASHPOINTS,#CASHPOINTS+$troca_valr[@s];
+				dispbottom "[Saldo: "+#CASHPOINTS+"]";
+				mes "["+strnpcinfo(0)+"]";
+				mes "Muito Bem Item trocado. Tenha um bom dia.";
+				close;
+	}
+	mes "Me desculpe mas ocorreu um erro, reporte a equipe de game masters.";
+	close;
+}

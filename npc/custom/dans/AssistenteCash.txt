@@ -1,0 +1,162 @@
+// ==================================================== //
+// eAthena						//
+// Não remover os créditos				//
+// Feito por: CarlosHenrq (eAthena/Cronus)		//
+// Suportado por: Cronus e eAthena [SQL e TXT]		//
+// Versão do script: Final - Testado e Funcionando	//
+// ==================================================== //
+prontera,147,155,5	script	Assistente de Rops	833,{
+	set .nome$,"["+strnpcinfo(0)+"]";
+	mes .nome$;
+	mes "Olá seja bem vindo, eu sou o assistente de ROPS do eRO e posso lhe fornecer certas coisas, então vamos lá!";
+	next;
+	switch(select("Quantos Rops eu Tenho?:Refinar um item:Comprar Ygg:Pegar carrinho ou falcão:Cancelar")){
+			mes .nome$;
+		case 1:
+			mes "Você possui um total de "+#CASHPOINTS+" em rops.";
+			close;
+		case 2:
+			for(set @i,1; @i <= 10; set @i,@i+1){
+				if(getequipid(@i) > 0){
+					set .@menu$,.@menu$+getitemname(getequipid(@i));
+				}
+				set .@menu$,.@menu$+":";
+			}
+			if(.@menu$ == "::::::::::"){
+				mes "Você não possui itens equipados.";
+				close;
+			}
+			mes "Selecione o item que você deseja refinar.";
+			next;
+			set @s,select(.@menu$);
+			mes .nome$;
+			mes "Eu irei cobrar um valor de 1000 Rops para refinar o item até o +10 e sem erro.";
+			next;
+			if(select("Continuar:Cancelar")) == 2 close;
+				mes .nome$;
+				if(#CASHPOINTS < 1000){
+					mes "Você não possui o total de cash para continuar!";
+					close;
+				}
+				setarray @card_id[0],getequipcardid(@s,0),getequipcardid(@s,1),getequipcardid(@s,2),getequipcardid(@s,3);
+				set @id,getequipid(@s);
+				if(countitem2(@id,1,getequiprefinerycnt(@s),0,@card_id[0],@card_id[1],@card_id[2],@card_id[3]) > 1){
+					mes "Você não pode carregar 2 itens iguais com as mesmas caracteristicas antes de fazer o refinamento.";
+					close;
+				}
+				if(getequiprefinerycnt(@s) == 10){
+					mes "Você não pode refinar um item no refinamento máximo!";
+					close;
+				}
+				delitem2 @id,1,1,getequiprefinerycnt(@s),0,@card_id[0],@card_id[1],@card_id[2],@card_id[3];
+				getitem2 @id,1,1,10,0,@card_id[0],@card_id[1],@card_id[2],@card_id[3];
+				specialeffect EF_REFINEOK;
+				set #CASHPOINTS,#CASHPOINTS-1000;
+				mes "Item refinado! Tenha um bom dia.";
+				close;
+		case 3:
+			mes "Olá Gostaria de comprar 329 Frutos de Yggdrasil por 100 rops?";
+			next;
+			if(select("Sim:Não")) == 2 close;
+				mes .nome$;
+				if(#CASHPOINTS < 100){
+					mes "Você não possui o total de cash para continuar!";
+					close;
+				}
+				if(!checkweight(607,329)){
+					mes "Você está com muito peso para adquirir as Yggs.";
+					close;
+				}
+				set #CASHPOINTS,#CASHPOINTS-100;
+				getitem 607,329;
+				mes "Ai estão suas yggs, tenha um bom dia.";
+				close;
+		case 4:
+			mes "Selelcione o que você deseja pegar.";
+			next;
+			switch(select("Carrinho:Falcão")){
+					mes .nome$;
+				case 1:
+					if((BaseClass == Job_Merchant || BaseJob == Job_SuperNovice) && !checkcart() && getskilllv("MC_PUSHCART")>0) {
+						setcart;
+						mes "Ai está seu carrinho!";
+						close;
+					}else if(checkcart()){
+						mes "Você ja possui um carrinho!";
+						close;
+					}else if(BaseClass == Job_Merchant || BaseJob == Job_SuperNovice){
+						mes "Você não possui a skill para poder utilizar carrinho! Volte quando tiver!";
+						close;
+					}else if(cart_add){
+						if(checkfalcon()) set @n,24;
+						else set @n,8;
+						atcommand "@option 0 0 "+@n;
+						mes "Ai está seu carrinho!";
+						close;
+					}else{
+						mes "Você pode adquirir um carrinho por 1000 rops com qualquer classe, sendo que caso você o perca poderá voltar para recupera-lo comigo, topa?";
+						next;
+						if(select("Não:Sim")) == 1 close;
+							mes .nome$;
+							if(#CASHPOINTS < 1000){
+								mes "Você não possui pontos de cash para continuar!";
+								close;
+							}
+							set #CASHPOINTS,#CASHPOINTS-1000;
+							set cart_add,1;
+							if(checkfalcon()) set @n,24;
+							else set @n,8;
+							atcommand "@option 0 0 "+@n;
+							mes "Ai está seu carrinho por rops!";
+							close;
+					}
+				case 2:
+					if(BaseJob != Job_Archer && BaseClass == Job_Archer && !checkfalcon() && getskilllv("HT_FALCON")>0) {
+						setfalcon;
+						mes "Ai está seu falcão!";
+						close;
+					}else if(checkfalcon()){
+						mes "Você ja possui um falcão!";
+						close;
+					}else if(BaseJob != Job_Archer && BaseClass == Job_Archer){
+						mes "Você não possui as skills para adquirir um falcão, volte quando tiver!";
+						close;
+					}else if(falcon_add){
+						if(checkcart()) set @n,24;
+						else set @n,16;
+						atcommand "@option 0 0 "+@n;
+						mes "Ai está seu falcão!";
+						skill 130,1,0;
+						close;
+					}else{
+						mes "Você pode adquirir um falcão por 1000 rops com qualquer classe, sendo que caso você o perca poderá voltar para recupera-lo comigo, topa?";
+						next;
+						if(select("Não:Sim")) == 1 close;
+							mes .nome$;
+							if(#CASHPOINTS < 1000){
+								mes "Você não possui pontos de cash para continuar!";
+								close;
+							}
+							set #CASHPOINTS,#CASHPOINTS-1000;
+							set falcon_add,1;
+							if(checkcart()) set @n,24;
+							else set @n,16;
+							atcommand "@option 0 0 "+@n;
+							skill 130,1,0;
+							mes "Ai está seu falcão por rops!";
+							close;
+					}
+			case 3:
+				if(BaseJob != Job_Swordman && BaseClass == Job_Swordman && checkriding() == 0 && getskilllv("KN_RIDING")>0) {
+					setriding;
+					close;
+				}else{
+					mes "Você não pode adquirir um peco-peco!";
+					close;
+				}
+		}
+		case 5:
+			mes "Tenha um bom dia.";
+			close;
+		}
+}

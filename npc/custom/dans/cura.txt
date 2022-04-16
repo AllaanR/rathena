@@ -1,0 +1,6 @@
+-	script	Heal	-1,{
+	OnPCLoadMapEvent:
+		if(strcharinfo(3) == "prontera") percentheal 100,100;
+		end;
+}
+prontera	mapflag	loadevent

@@ -1,0 +1,31 @@
+prontera,155,155,5	script	Arena PK 	734,{
+	mes "["+strnpcinfo(0)+"]";
+	mes "Gostaria de ir a qual Arena?";
+	next;
+	if(select("Arena PK:Arena PK No-VIP:Cancelar")) == 3 close;
+	else if(@menu == 2){
+		mes "["+strnpcinfo(0)+"]";
+		if(getgmlevel()){
+			mes "Infelizmente você é vip, e não poderá entrar!";
+		}else{
+			if(BaseLevel < 750){
+				mes "O nivel minimo para poder entrar é 700!";
+				close;
+			}
+			mes "Irei te teletransportar para la!";
+			close2;
+			warp "guild_vs3",0,0;
+			end;
+		}
+		close;
+	}else if(@menu == 1){
+		if(BaseLevel < 750){
+			mes "O nivel minimo para poder entrar é 700!";
+			close;
+		}
+		mes "Irei te teletransportar para la!";
+		close2;
+		warp "guild_vs2",0,0;
+		end;
+	}
+}

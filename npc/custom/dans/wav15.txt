@@ -1,0 +1,21 @@
+-	script	PvP#rank	-1,{
+	OnInit:
+		setarray .song$[1],"headShot.wav","doubleKill.wav","tripleKill.wav","firstBlood.wav","ultraKill.wav","monsterKill.wav";
+		end;
+	OnPCDieEvent: callsub OnCheckMap,0;
+	OnPCKillEvent: callsub OnCheckMap,1;
+	OnCheckMap:
+		if(strcharinfo(3) != "new_1-1") end;
+		if(!getarg(0)) set @vit,0;
+		else{
+			set @vit,@vit+1;
+			soundeffectall ((@vit >= 6) ? .song$[6]:.song$[@vit]),0;
+			set .char_killer$,strcharinfo(0);
+			set .char_killed,killedrid;
+			detachrid;
+			attachrid(.char_killed);
+			announce "O Jogador "+.char_killer$+" matou o jogador "+strcharinfo(0),bc_all;
+			detachrid;
+		}
+		end;
+}

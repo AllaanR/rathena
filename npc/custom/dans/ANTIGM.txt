@@ -1,0 +1,22 @@
+// = Por: Danilo Velasco (destine).
+
+-	script	Verificador de Nick	-1,{
+
+OnPCLoginEvent:
+
+if ( getgmlevel() < 40 ){
+set @nome$,strcharinfo(0);
+
+	if (compare(@nome$,"ADM") || compare(@nome$,"A D M")  || compare(@nome$,"A  D M")  || compare(@nome$,"A D  M") || compare(@nome$,"A  D  M") || compare(@nome$,"GM") || compare(@nome$,"G M")
+	|| compare(@nome$,"G  M") || compare(@nome$,"G   M") || compare(@nome$,"CM") || compare(@nome$,"C M") || compare(@nome$,"C   M") || compare(@nome$,"C    M")) {
+		mes "[Verificador de Nick]";
+		mes "Por favor, não crie personagens com inicias:";
+		mes "^FF0000- ADM";
+		mes "- GM";
+		mes "- CM^000000";
+		mes "Esta janela deve ser fechada imediatamente.";
+		sleep2 10000;
+		atcommand "@kick "+@nome$;
+		close2;
+		atcommand "@kick "+@nome$;
+		}

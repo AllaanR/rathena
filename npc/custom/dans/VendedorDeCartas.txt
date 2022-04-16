@@ -1,0 +1,41 @@
+// ==================================================== //
+// eAthena						//
+// Não remover os créditos				//
+// Feito por: CarlosHenrq (eAthena/Cronus)		//
+// Suportado por: Cronus e eAthena [SQL e TXT]		//
+// Versão do script: v1.0 - Testado e Funcionando	//
+// ==================================================== //
+
+prontera,147,151,3	script	Vendedor de Cartas	758,{
+	set .nome$,"[ "+strnpcinfo(0)+" ]";
+	mes .nome$;
+	mes "Olá "+strcharinfo(0)+", Gostaria de comprar qualquer carta no valor de 5000 Rops?";
+	next;
+	if(select("Sim:Não")) == 2 close;
+		mes .nome$;
+		mes "Digite o ID da carta qual você deseja comprar.";
+		next;
+		set @c,input(@card_id,4000,4999);
+		while(@c || getitemname(@card_id) == "null"){
+			mes .nome$;
+			mes "Este item não existe! Por favor digite um id valido!";
+			next;
+			if(select("Digitar Novamente:Cancelar")) == 2 close;
+				set @c,input(@card_id,4000,4999);
+		}
+		mes .nome$;
+		if(#CASHPOINTS < 5000){
+			mes "Você não possui pontos de cash suficientes para adquirir este item.";
+			close;
+		}
+		mes "Você tem certeza que deseja adquirir";
+		mes getitemname(@card_id)+" no valor de 5000 Rops?";
+		next;
+		if(select("Sim:Não")) == 2 close;
+			set #CASHPOINTS,#CASHPOINTS-5000;
+			dispbottom "[Pontos Restantes: "+#CASHPOINTS+"]";
+			getitem @card_id,1;
+			mes .nome$;
+			mes "Ai está sua carta. Tenha um bom dia.";
+			close;
+}

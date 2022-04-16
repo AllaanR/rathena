@@ -1,0 +1,7 @@
+function	script	caixa_surpresa	{
+	if(getarg(0) <= 40) getitem 15002,1;
+	else if(getarg(0) > 40 && getarg(0) <= 60) set Zeny,Zeny+300000000;
+	else if(getarg(0) > 60 && getarg(0) <= 60) getitem 15001,2;
+	else if(getarg(0) > 70 && getarg(0) <= 80) set #CASHPOINTS,#CASHPOINTS+3000;
+	return;
+}

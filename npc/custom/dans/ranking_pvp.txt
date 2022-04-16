@@ -1,0 +1,87 @@
+-	script	pvp#rank	-1,{
+	OnPCKillEvent: callsub Add_rank,1;
+	OnPCDieEvent: callsub Add_rank,2;
+	OnInit:
+		query_sql "CREATE TABLE IF NOT EXISTS `pvp_arena` (`char_id` INT(11) NOT NULL, `nome` VARCHAR(255) NOT NULL, `matou` INT(11) NOT NULL, `morreu` INT(11) NOT NULL)";
+		query_sql "CREATE TABLE IF NOT EXISTS `pvp_pk` (`char_id` INT(11) NOT NULL, `nome` VARCHAR(255) NOT NULL, `matou` INT(11) NOT NULL, `morreu` INT(11) NOT NULL)";
+		end;
+	Add_rank:
+		query_sql "SELECT `char_id` FROM `pvp_pk` WHERE `nome` = '"+strcharinfo(0)+"'",.@char;
+		if(!.@char){
+			query_sql "INSERT INTO `pvp_pk` VALUES ('"+getcharid(0)+"','"+strcharinfo(0)+"','"+((getarg(0) == 1) ? 1:0)+"','"+((getarg(0) == 1) ? 0:1)+"')";
+		}else{
+			query_sql "UPDATE `pvp_pk` SET `"+((getarg(0) == 1)? "matou":"morreu")+"` = `"+((getarg(0) == 1)? "matou":"morreu")+"` + '1' WHERE `char_id` = '"+getcharid(0)+"'";
+		}
+		if(strcharinfo(3) == "guild_vs2" || strcharinfo(3) == "guild_vs3"){
+			query_sql "SELECT `nome` FROM `pvp_arena` WHERE `char_id` = '"+getcharid(0)+"'",.@nome$;
+			if(.@nome$ != ""){
+				query_sql "UPDATE `pvp_arena` SET `"+((getarg(0) == 1)? "matou":"morreu")+"` = `"+((getarg(0) == 1)? "matou":"morreu")+"` + '1' WHERE `char_id` = '"+getcharid(0)+"'";
+			}else{
+				query_sql "INSERT INTO `pvp_arena` VALUES ('"+getcharid(0)+"','"+strcharinfo(0)+"','"+((getarg(0) == 1) ? 1:0)+"','"+((getarg(0) == 1) ? 0:1)+"')";
+			}
+		}
+		end;
+}
+prontera,147,159,5	script	Ranking PvP	123,{
+	mes "["+strnpcinfo(0)+"]";
+	mes "Olá "+strcharinfo(0)+", o que você gostaria de fazer?";
+	next;
+	if(select("Rank PK:Rank Total:Top 10 PK:Top 10 Mundial:"+((getgmlevel() >= 99)?"Resetar os Ranks":"")+":Cancelar")) == 6 close;
+	else if(@menu == 2){
+		mes "["+strnpcinfo(0)+"]";
+		query_sql "SELECT `matou`,`morreu` FROM `pvp_pk` WHERE `char_id` = '"+getcharid(0)+"'",.@matou,.@morreu;
+		if(!.@matou && !.@morreu){
+			mes "Você ainda não está participando do ranking!";
+		}else{
+			mes "Você matou ["+.@matou+"]";
+			mes "Você morreu ["+.@morreu+"]";
+		}
+		close;
+	}else if(@menu == 1){
+		mes "["+strnpcinfo(0)+"]";
+		query_sql "SELECT `char_id`,`matou`,`morreu` FROM `pvp_arena` ORDER BY `matou`-`morreu` DESC",.@char,.@matou,.@morreu;
+		if(!getarraysize(.@char)){
+			mes "Não existem personagens no rank!";
+		}else{
+			for(set @i,0; @i < getarraysize(.@char); set @i,@i+1){
+				if(.@char[@i] == getcharid(0)){
+					mes "Sua colocação: "+(@i+1);
+					mes "Você matou: "+.@matou[@i];
+					mes "Você morreu: "+.@morreu[@i];
+					close;
+				}
+			}
+			mes "Você não está no rank.";
+			close;
+		}
+		close;
+	}else if(@menu == 3){
+		mes "["+strnpcinfo(0)+"]";
+		query_sql "SELECT `nome`,`matou`,`morreu` FROM `pvp_pk` ORDER BY `matou`-`morreu` DESC LIMIT 10",.@nome$,.@matou,.@morreu;
+		if(!getarraysize(.@nome$)){
+			mes "Não existem jogadores neste rank.";
+		}else{
+			for(set @i,0; @i < getarraysize(.@nome$); set @i,@i+1)
+				dispbottom (@i+1)+"º - "+.@nome$[@i]+" - "+.@matou[@i]+" - "+.@morreu[@i];
+			mes "Ai está o ranking.";
+		}
+		close;
+	}else if(@menu == 4){
+		mes "["+strnpcinfo(0)+"]";
+		query_sql "SELECT `nome`,`matou`,`morreu` FROM `pvp_arena` ORDER BY `matou`-`morreu` DESC LIMIT 10",.@nome$,.@matou,.@morreu;
+		if(!getarraysize(.@nome$)){
+			mes "Não existem jogadores neste rank.";
+		}else{
+			for(set @i,0; @i < getarraysize(.@nome$); set @i,@i+1)
+				dispbottom (@i+1)+"º - "+.@nome$[@i]+" - "+.@matou[@i]+" - "+.@morreu[@i];
+			mes "Ai está o ranking.";
+		}
+		close;
+	}else if(@menu == 5){
+		mes "["+strnpcinfo(0)+"]";
+		query_sql "TRUNCATE TABLE `pvp_arena`";
+		query_sql "TRUNCATE TABLE `pvp_pk`";
+		mes "Os rankings foram resetados!";
+		close;
+	}
+}

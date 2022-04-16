@@ -1,0 +1,43 @@
+prontera,167,154,3	script	Assistente de Yggs	807,{
+	mes "["+strnpcinfo(0)+"]";
+	mes "O que gostaria de Fazer?";
+	next;
+	if(select("Empacotar Ygg:Trocar Seeds:Trocar Yggs:Cancelar")) == 4 close;
+	else if(@menu == 2){
+		mes "["+strnpcinfo(0)+"]";
+		mes "Para cada ygg que eu te dar, irei cobrar 2 Seeds.";
+		mes "Você possui "+countitem(608)+" Seeds.";
+		if(countitem(608) < 2) close;
+		mes "Poderei te dar: "+(countitem(608)/2)+" Yggs";
+		next;
+		if(select("Continuar:Cancelar")) == 2 close;
+			getitem 607,(countitem(608)/2);
+			delitem 608,countitem(608);
+			mes "["+strnpcinfo(0)+"]";
+			mes "Ai está.";
+			close;
+	}else if(@menu == 1){
+		mes "["+strnpcinfo(0)+"]";
+		mes "Empacotar 5000 Yggs em uma caixa?";
+		next;
+		if(select(((countitem(607) >= 5000) ? "Sim":"")+":Não")) == 2 close;
+		delitem 607,5000;
+		getitem 15002,1;
+		mes "["+strnpcinfo(0)+"]";
+		mes "Ai está.";
+		close;
+	}else if(@menu == 3){
+		mes "["+strnpcinfo(O)+"]";
+		mes "Para cada duas Seeds que eu te dar, irei cobrar 1 Ygg.";
+		mes "Você possui "+countitem(607)+" Yggs.";
+		if(countitem(607) < 1) close;
+		mes "Poderei te dar: "+(countitem(607)*2)+" Seeds";
+		next;
+		if(select("Continuar:Cancelar")) == 2 close;
+			getitem 608,(countitem(607)*2);
+			delitem 607,countitem(607);
+			mes "["+strnpcinfo(O)+"]";
+			mes "Ai está.";
+			close;
+	}
+}

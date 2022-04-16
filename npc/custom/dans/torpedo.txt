@@ -1,0 +1,66 @@
+// ======================================================================================================================= //
+// |                                             Favor Nâo Remover os Créditos                                           | //
+// |                                         Feito por: CarlosHenrq (eAthena/Cronus)                                     | //
+// |                                         Bugs Reportar: carlos_henrq@hotmail.com                                     | //
+// |                                   Emuladores Compativeis: Cronus & eAthena [SQL & TXT]                              | //
+// | --------------------------------------------------------------------------------------------------------------------| //
+// | * ChangeLog:                                                                                                        | //
+// | v1.0 - Criada.                                                                                                      | //
+// | v1.1 - Corrigido bug fantasma.                                                                                      | //
+// | --------------------------------------------------------------------------------------------------------------------| //
+// | * Descrição:                                                                                                        | //
+// | - Envia torpedos de vendas e compras com limte de 15 e a cada 24 horas.                                             | //
+// ======================================================================================================================= //
+prontera,147,163,5	script	Torpedo 	123,{
+		set .nome$,"["+strnpcinfo(0)+"]";
+		mes .nome$;
+		if(#TIM_TIME >= gettimetick(2) && #TIM_SEND >= 15){
+			mes "Você ja mandou seus 15 torpedos! Aguarde 24h para enviar novamente!";
+			close;
+		}else if(#TIM_SEND >= 15 && #TIM_TIME < gettimetick(2)){
+			set #TIM_SEND,0;
+		}
+		mes "Seu saldo é de: "+(15-#TIM_SEND);
+		mes "Gostaria de enviar um torpedo?";
+		next;
+		if(select("Sim:Não")) == 2 close;
+			mes .nome$;
+			mes "Selecione o serviço que você deseja utilizar.";
+			next;
+			if(select("- Torpedo de Vendas:- Torpedo de Compras:- Cancelar")) == 3 close;
+			else if(@menu == 1){
+				mes .nome$;
+				mes "Digite o que você está vendendo.";
+				next;
+				input @vender$;
+				next;
+				mes .nome$;
+				mes "Digite o que você quer em troca.";
+				next;
+				input @compra$;
+				announce strcharinfo(0)+": Estou vendendo ["+@vender$+"] e quero em troca ["+@compra$+"] MANDE PM RAPIDO !!",bc_all;
+			}else{
+				mes .nome$;
+				mes "Digite o que você está comprando.";
+				next;
+				input @compra$;
+				mes .nome$;
+				mes "Digite o que você oferece em "+@compra$;
+				next;
+				input @vender$;
+				announce strcharinfo(0)+": Quero comprar ["+@compra$+"] e estou dando em troca ["+@vender$+"] MANDE PM RAPIDO !!",bc_all;
+			}
+			mes .nome$;
+			set #TIM_SEND,#TIM_SEND+1;
+			mes "Seu torpedo foi enviado com sucesso! Tenha um bom dia.";
+			if(#TIM_SEND >= 15){
+				set #TIM_TIME,gettimetick(2)+(24*3600);
+				mes "Seus torpedos acabaram, eles renovam a cada 24 horas após o uso do ultimo torpedo, volte amanhã. Obrigado!";
+			}else{
+				mes "Seu saldo é de: "+(15-#TIM_SEND);
+			}
+			close;
+	OnInit:
+		waitingroom "Mande um torpedo",0;
+		end;
+}

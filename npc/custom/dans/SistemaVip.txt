@@ -1,0 +1,90 @@
+prontera,147,161,5	script	Assistente Vip	893,{
+		set .nome$,"[ ^0000ff"+strnpcinfo(0)+"^000000 ]";
+		mes .nome$;
+		if(getgmlevel() >= 99){
+			mes "Gostaria de adicionar vip eterno a um jogador?";
+			next;
+			if(select("Não:Sim")) == 1 close;
+				mes .nome$;
+				mes "Digite o nome do jogador que irá receber o vip.";
+				input @player$;
+				next;
+				query_sql "SELECT `account_id` FROM `char` WHERE `name` = '"+@player$+"'",.@acc;
+				mes .nome$;
+				if(!.@acc){
+					mes "Este jogador não existe.";
+					close;
+				}
+				query_sql "SELECT `value` FROM `global_reg_value` WHERE `str` = '#TIME_VIP' AND `account_id` = '"+.@acc+"'",.@value;
+				mes "Você deseja colocar o jogador "+@player+" com vip infinito?";
+				next;
+				if(select("Sim:Não")) == 2 close;
+					mes .nome$;
+					if(.@value > 0) set @query$,"UPDATE `global_reg_value` SET `value` = '-1' WHERE `str` = '#TIME_VIP' AND `account_id` = '"+.@acc+"'";
+					else if(!.@value) set @query$,"INSERT INTO `global_reg_value` ('0','#TIME_VIP','-1','2','"+.@acc+"')";
+					else if(.@value < 0){
+						mes "Este jogador já é vip eterno!";
+						close;
+					}
+					query_sql @query$;
+					mes "Vip adicionado!";
+					if(isloggedin(.@acc)) mes "Peça ao jogador "+@player$+" relogar e o vip será adicionado.";
+					close;
+		}
+		if(#TIME_VIP > gettimetick(2)){
+			mes "Você possui:";
+			mes ((#TIME_VIP-gettimetick(2))/2592000)+" Meses";
+			mes ((#TIME_VIP-gettimetick(2))/86400)+" Dias";
+			mes ((#TIME_VIP-gettimetick(2))/3600)+" Horas";
+			mes ((#TIME_VIP-gettimetick(2))/60)+" Minutos";
+			mes (#TIME_VIP-gettimetick(2))+" Segundos";
+			mes "De vip.";
+		}else if(#TIME_VIP == -1){
+			mes "Você possui vip eterno!";
+			close;
+		}
+		mes "Olá "+strcharinfo(0)+", sou o assistente vip, está interessado em adiquirir e ter inumeras vantagens?";
+		next;
+		if(select("Sim:Não")) == 2 close;
+			set @mes,0;
+			while(!@mes){
+				mes .nome$;
+				mes "Para cada mês VIP (30 dias) será cobrado um valor de 1.000 ROPS.";
+				mes "Digite o número de meses que você deseja.";
+				input @mes;
+				next;
+			}
+			set @valor,@mes*1000;
+			mes .nome$;
+			mes "O valor de "+@mes+" vip será de "+@valor;
+			mes "Gostária de continuar?";
+			next;
+			if(select("Sim:Não")) == 2 close;
+				mes .nome$;
+				if(#CASHPOINTS < @valor){
+					mes "Você não possui cash suficiente! Para saber como adiquirir ROPS acesse www.elivero.com.br, Obrigado";
+					close;
+				}
+				if(#TIME_VIP > gettimetick(2)) set #TIME_VIP,#TIME_VIP+(@mes*2592000);
+				else set #TIME_VIP,gettimetick(2)+(@mes*2592000);
+				set #CASHPOINTS,#CASHPOINTS-@valor;
+				query_sql "INSERT INTO `sistema_vip` ('"+getcharid(0)+"','"+getcharid(3)+"','"+gettimestr("%Y-%m-%d %H:%M:%S",21)+"','"+@mes+" meses','"+gettimetick(2)+"','"+#TIME_VIP+"')";
+				atcommand "@adjgmlvl 1 "+strcharinfo(0);
+				mes "Seus vips foram adicionados!";
+				close;
+	OnInit:
+		query_sql "CREATE TABLE IF NOT EXISTS `sistema_vip` (`id` INT(11) NOT NULL,`account_id` INT(11) NOT NULL,`data` VARCHAR(255) NOT NULL,`tempo` INT(11) NOT NULL,`inicio` INT(255) NOT NULL,`termino` INT(255) NOT NULL)";
+		end;
+	OnPCLoginEvent:
+		if(#TIME_VIP > gettimetick(2) && getgmlevel() < 99){
+			atcommand "@adjgmlvl 1 "+strcharinfo(0);
+			dispbottom "Você possui:";
+			dispbottom ((#TIME_VIP-gettimetick(2))/2592000)+" Meses";
+			dispbottom ((#TIME_VIP-gettimetick(2))/86400)+" Dias";
+			dispbottom ((#TIME_VIP-gettimetick(2))/3600)+" Horas";
+			dispbottom ((#TIME_VIP-gettimetick(2))/60)+" Minutos";
+			dispbottom (#TIME_VIP-gettimetick(2))+" Segundos";
+			dispbottom "De vip.";
+		}else if(#TIME_VIP == -1) atcommand "@adjgmlvl 1 "+strcharinfo(0);
+		end;
+}
